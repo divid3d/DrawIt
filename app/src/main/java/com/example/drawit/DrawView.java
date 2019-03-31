@@ -3,22 +3,23 @@ package com.example.drawit;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
-import android.graphics.Color;
 
 import java.util.ArrayList;
 
 public class DrawView extends View {
 
-    public static int BRUSH_SIZE = 20;
     public static final int DEFAULT_COLOR = Color.BLACK;
     public static final int DEFAULT_BG_COLOR = Color.WHITE;
     private static final float TOUCH_TOLERANCE = 4;
+    public static int BRUSH_SIZE = 20;
     private float mX, mY;
     private Path mPath;
     private Paint mPaint;
@@ -29,7 +30,7 @@ public class DrawView extends View {
     private Bitmap mBitmap;
     private Canvas mCanvas;
     private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-
+    private boolean drawOn = true;
 
     public DrawView(Context context) {
         this(context, null);
@@ -49,12 +50,23 @@ public class DrawView extends View {
 
     }
 
+    public boolean isDrawOn() {
+        return drawOn;
+    }
+
+    public void setDrawOn(boolean drawOn) {
+        this.drawOn = drawOn;
+    }
+
     public void init(DisplayMetrics metrics) {
         int height = metrics.heightPixels;
         int width = metrics.widthPixels;
 
+
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
         mCanvas = new Canvas(mBitmap);
+
 
         currentColor = DEFAULT_COLOR;
         strokeWidth = BRUSH_SIZE;
@@ -113,29 +125,53 @@ public class DrawView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
+        if (drawOn) {
+            float x = event.getX();
+            float y = event.getY();
 
-        switch(event.getAction()) {
-            case MotionEvent.ACTION_DOWN :
-                touchStart(x, y);
-                invalidate();
-                break;
-            case MotionEvent.ACTION_MOVE :
-                touchMove(x, y);
-                invalidate();
-                break;
-            case MotionEvent.ACTION_UP :
-                touchUp();
-                invalidate();
-                break;
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touchStart(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    touchMove(x, y);
+                    invalidate();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    touchUp();
+                    invalidate();
+                    break;
+            }
         }
-
         return true;
     }
 
-    public void setCurrentColor(int color){
+    public void setCurrentColor(int color) {
         currentColor = color;
     }
 
+    public void undo() {
+        if (!paths.isEmpty()) {
+            paths.remove(paths.size() - 1);
+            invalidate();
+        }
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
+    }
 }

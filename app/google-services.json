@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "722512707305",
+    "firebase_url": "https://drawit-8f8ea.firebaseio.com",
+    "project_id": "drawit-8f8ea",
+    "storage_bucket": "drawit-8f8ea.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:722512707305:android:edb5c8452031693d",
+        "android_client_info": {
+          "package_name": "com.example.drawit"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "722512707305-m6opjjges4cq0a0g4dpodgvdjtshv4gd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.drawit",
+            "certificate_hash": "ef048c265e63f7d987eca28e8a1c36a4cdff5360"
+          }
+        },
+        {
+          "client_id": "722512707305-imbfddpsjqqc948p9fktbmshkakvbpk6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcrRL2wyPRo8wiSXnTwotKSSx2FxphKpA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "722512707305-imbfddpsjqqc948p9fktbmshkakvbpk6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

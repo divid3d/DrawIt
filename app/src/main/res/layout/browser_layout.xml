@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E4E4E4">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:theme="@style/AppTheme"
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/notes_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layoutAnimation="@anim/layout_animation_fall_dawn" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+
+</RelativeLayout>

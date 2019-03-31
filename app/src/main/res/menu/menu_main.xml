@@ -5,6 +5,13 @@
     tools:context=".MainActivity">
 
     <item
+        android:id="@+id/action_undo"
+        android:icon="@drawable/ic_undo_black_24dp"
+        android:orderInCategory="300"
+        android:title="Undo"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_clear"
         android:icon="@drawable/ic_baseline_delete_forever_24px"
         android:orderInCategory="300"

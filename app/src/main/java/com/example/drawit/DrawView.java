@@ -61,13 +61,8 @@ public class DrawView extends View {
     public void init(DisplayMetrics metrics) {
         int height = metrics.heightPixels;
         int width = metrics.widthPixels;
-
-
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
         mCanvas = new Canvas(mBitmap);
-
-
         currentColor = DEFAULT_COLOR;
         strokeWidth = BRUSH_SIZE;
     }

@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         mStorageReference = FirebaseStorage.getInstance().getReference("Notes");
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
 
-        String note_url = getIntent().getStringExtra("note_url");
+        /*String note_url = getIntent().getStringExtra("note_url");
         if (note_url != null) {
             Toast.makeText(this, "Cos tam jest", Toast.LENGTH_SHORT).show();
             mColorPicker.setVisibility(View.GONE);
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-        }
+        }*/
 
     }
 
@@ -177,12 +177,13 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter note name");
+        builder.setCancelable(false);
 
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
-        builder.setPositiveButton("OK", (dialog, which) -> {
+        builder.setPositiveButton("Upload", (dialog, which) -> {
             final int progressMax = 100;
 
             NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
@@ -226,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         notification.setProgress(100, progress, false);
                         notificationManagerCompat.notify(1, notification.build());
                     });
-
-
+            finish();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();

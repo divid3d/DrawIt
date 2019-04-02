@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -30,6 +28,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,15 +39,18 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
     private FloatingActionButton fab;
     private SearchView mSearchView;
     private Toolbar mToolbar;
-    private FragmentManager fragmentManager;
     private FirebaseAuth mAuth;
 
     private RecyclerView recyclerView;
     private DatabaseReference mDatabaseReferance;
+    private FirebaseStorage mStorage;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private List<Note> mNotes = new ArrayList<>();
     private NoteAdapter noteAdapter;
-    private boolean sortedInOrder = false;
+    private boolean sortedByName = false;
+    private boolean sortedByDate = false;
+    private boolean sortedByFavourites = false;
+    private boolean initRecyclerViewAnimation = true;
 
 
     @Override
@@ -59,9 +61,9 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
 
         mToolbar = findViewById(R.id.toolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
+
         setSupportActionBar(mToolbar);
         fab = findViewById(R.id.fab);
-        //mToolabar = findViewById(R.id.toolbar);
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
 
@@ -87,7 +89,9 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setHasFixedSize(true);
 
+
         mDatabaseReferance = FirebaseDatabase.getInstance().getReference("Notes");
+        mStorage = FirebaseStorage.getInstance();
         mDatabaseReferance.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -99,9 +103,11 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 }
 
 
-
                 noteAdapter.notifyDataSetChanged();
-                recyclerView.scheduleLayoutAnimation();
+                if (initRecyclerViewAnimation) {
+                    initRecyclerViewAnimation = false;
+                    recyclerView.scheduleLayoutAnimation();
+                }
                 mSwipeRefreshLayout.setRefreshing(false);
 
             }
@@ -130,27 +136,32 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_search) {
-            return true;
-        }else if(id == R.id.action_sort){
-            if(!sortedInOrder) {
-                Collections.sort(mNotes, (n1, n2) -> n1.getName().trim().compareTo(n2.getName().trim()));
-                sortedInOrder = true;
-            }else{
-                Collections.sort(mNotes, (n1, n2) -> n2.getName().trim().compareTo(n1.getName().trim()));
-                sortedInOrder = false;
-            }
-            noteAdapter.notifyDataSetChanged();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                return true;
+
+            case R.id.action_sort_by_name:
+                sortedByDate = false;
+                sortedByFavourites = false;
+                if (!sortedByName) {
+                    Collections.sort(mNotes, (n1, n2) -> n1.getName().trim().toLowerCase().compareTo(n2.getName().trim().toLowerCase()));
+                    sortedByName = true;
+                } else {
+                    Collections.sort(mNotes, (n1, n2) -> n2.getName().trim().toLowerCase().compareTo(n1.getName().trim().toLowerCase()));
+                    sortedByName = false;
+                }
+                noteAdapter.notifyDataSetChanged();
+                return true;
+
+
+            case R.id.action_sort_by_favourites:
+                return true;
+
+            case R.id.action_delete:
+
+                return true;
         }
-
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -197,4 +208,5 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         });
         return true;
     }
+
 }

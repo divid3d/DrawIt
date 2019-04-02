@@ -1,12 +1,7 @@
 package com.example.drawit;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,7 +12,6 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -26,8 +20,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
@@ -35,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+
+import dmax.dialog.SpotsDialog;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -59,7 +53,10 @@ public class MainActivity extends AppCompatActivity {
         drawView.init(metrics);
         drawView.setDrawingCacheEnabled(true);
         mToolbar = findViewById(R.id.main_toolbar);
+        mToolbar.setTitleTextColor(android.graphics.Color.WHITE);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
 
         mColorPicker = findViewById(R.id.color_picker);
         mColorPicker.setHasFixedSize(true);
@@ -77,31 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         mStorageReference = FirebaseStorage.getInstance().getReference("Notes");
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
-
-        /*String note_url = getIntent().getStringExtra("note_url");
-        if (note_url != null) {
-            Toast.makeText(this, "Cos tam jest", Toast.LENGTH_SHORT).show();
-            mColorPicker.setVisibility(View.GONE);
-            drawView.setDrawOn(true);
-            Picasso.get().load(note_url).into(new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    //??
-
-                }
-
-                @Override
-                public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                }
-            });
-
-        }*/
 
     }
 
@@ -128,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.action_share:
                 shareImage();
+                return true;
+
+            case android.R.id.home:
+                finish();
                 return true;
 
             default:
@@ -178,31 +154,23 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter note name");
         builder.setCancelable(false);
-
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
 
+        android.app.AlertDialog loadingDialog;
+        loadingDialog = new SpotsDialog.Builder().setContext(this).setTheme(R.style.LoadingDialogTheme).build();
+
+
         builder.setPositiveButton("Upload", (dialog, which) -> {
-            final int progressMax = 100;
-
-            NotificationCompat.Builder notification = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_baseline_delete_forever_24px)
-                    .setContentTitle("Upload")
-                    .setContentText("Upload in progress")
-                    .setOngoing(true)
-                    .setOnlyAlertOnce(true)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setProgress(progressMax, 0, false);
-
-            NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
-            notificationManagerCompat.notify(1, notification.build());
 
             String noteName = input.getText().toString();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
             StorageReference fileReference = mStorageReference.child(System.currentTimeMillis() + ".jpeg");
+            loadingDialog.setMessage("Uploading note "+noteName);
+            loadingDialog.show();
             mUploadTask = fileReference.putBytes(data)
                     .addOnSuccessListener(taskSnapshot -> {
                         Toast.makeText(getApplicationContext(), "File uploaded successfully", Toast.LENGTH_SHORT).show();
@@ -211,23 +179,18 @@ public class MainActivity extends AppCompatActivity {
                             Note note = new Note(noteName.trim(), millisToDate(taskSnapshot.getMetadata().getCreationTimeMillis()), url);
                             String uploadId = mDatabaseReference.push().getKey();
                             mDatabaseReference.child(uploadId).setValue(note);
-
-                            notification.setContentText("Upload finishied")
-                                    .setProgress(0, 0, false)
-                                    .setOngoing(false);
-                            notificationManagerCompat.notify(1, notification.build());
+                            loadingDialog.dismiss();
+                            finish();
                         });
                     })
                     .addOnFailureListener(e -> {
                         e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Upload error", Toast.LENGTH_SHORT).show();
+                        loadingDialog.dismiss();
                     })
                     .addOnProgressListener(taskSnapshot -> {
-                        int progress = (int) (((double) taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount()) * 100);
-                        notification.setProgress(100, progress, false);
-                        notificationManagerCompat.notify(1, notification.build());
                     });
-            finish();
+
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
@@ -239,8 +202,4 @@ public class MainActivity extends AppCompatActivity {
         return sdf.format(resultDate);
     }
 
-    private void showNotification() {
-
-
-    }
 }

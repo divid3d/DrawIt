@@ -4,20 +4,18 @@ package com.example.drawit;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -32,11 +30,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
     private DatabaseReference mDatabaseReference;
     private Context context;
 
+
     public NoteAdapter(Context context, List<Note> notes, OnNoteClickListener listener) {
         this.context = context;
         this.notes = notes;
         this.filteredNotes = notes;
         this.listener = listener;
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
     }
 
     @Override
@@ -89,9 +89,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.bind(colorList.get(position), listener);*/
         holder.textViewTitle.setText(filteredNotes.get(position).getName());
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
-        if(filteredNotes.get(position).isFavourite()){
+        if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
-        }else{
+        } else {
             holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
         }
         Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().centerInside().into(holder.image, new Callback() {
@@ -108,9 +108,11 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         });
 
         holder.image.setOnClickListener(v -> {
-            if(holder.isLoaded){
-                Intent intent = new Intent(context, MainActivity.class);
+            if (holder.isLoaded) {
+                Intent intent = new Intent(context, NoteViewActivity.class);
                 intent.putExtra("note_url", filteredNotes.get(position).getNoteUrl());
+                intent.putExtra("note_key", filteredNotes.get(position).getKey());
+                intent.putExtra("note_name", filteredNotes.get(position).getName());
                 context.startActivity(intent);
                 //Toast.makeText(context,String.valueOf(notes.get(position).getName()), Toast.LENGTH_SHORT).show();
             }
@@ -118,23 +120,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
         holder.favButton.setOnClickListener(v -> {
             if (!filteredNotes.get(position).isFavourite()) {
+                mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(true);
                 filteredNotes.get(position).setFavourite(true);
-               // holder.favButton.startAnimation(AnimationUtils.loadAnimation(this,))
                 holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
-                try {
-                    mDatabaseReference.child(filteredNotes.get(position).getKey()).setValue(filteredNotes.get(position));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
             } else {
+                mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(false);
                 filteredNotes.get(position).setFavourite(false);
                 holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
-                try {
-                    mDatabaseReference.child(filteredNotes.get(position).getKey()).setValue(filteredNotes.get(position));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         });
 

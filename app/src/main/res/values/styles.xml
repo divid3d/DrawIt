@@ -6,10 +6,20 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
     </style>
 
     <style name="ToolbarTheme" parent="AppTheme">
-        <item name="android:fontFamily">@font/product_sans_bold</item>
+        <item name="android:fontFamily">@font/pacifico</item>
     </style>
+
+
+    <style name="LoadingDialogTheme" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="DialogTitleAppearance">@android:style/TextAppearance.Medium</item>
+        <item name="DialogTitleText">Updating…</item>
+        <item name="DialogSpotColor">@color/colorPrimaryDark</item>
+        <item name="DialogSpotCount">6</item>
+    </style>
+
 
 </resources>

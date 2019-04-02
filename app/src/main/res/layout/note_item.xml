@@ -7,6 +7,7 @@
     app:cardCornerRadius="5dp"
     app:cardElevation="5dp">
 
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,22 +18,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/note_image"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:background="@android:color/white" />
-
-            <com.github.ybq.android.spinkit.SpinKitView
-                android:layout_centerInParent="true"
-                android:id="@+id/spin_kit"
-                style="@style/SpinKitView.Large.Circle"
+            <FrameLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:SpinKit_Color="@color/colorPrimary" />
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.jgabrielfreitas.core.BlurImageView
+                        android:id="@+id/note_image"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:background="@android:color/white" />
+
+                    <CheckBox
+                        android:id="@+id/select_checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:button="@drawable/custom_checkbox" />
+
+                    <com.github.ybq.android.spinkit.SpinKitView
+                        android:id="@+id/spin_kit"
+                        style="@style/SpinKitView.Large.Circle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        app:SpinKit_Color="@color/colorPrimary" />
+                </RelativeLayout>
+
+            </FrameLayout>
+
 
         </RelativeLayout>
 
@@ -79,14 +100,14 @@
 
 
             <ImageButton
-                android:stateListAnimator="@animator/scale"
                 android:id="@+id/favourite_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:src="@drawable/image_btn_src" />
+                android:src="@drawable/image_btn_src"
+                android:stateListAnimator="@animator/scale" />
         </LinearLayout>
 
 

@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +90,18 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setHasFixedSize(true);
 
+        /*recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(noteAdapter.isSelectMode()){
+                    noteAdapter.startSelectMode();
+                }else{
+                    noteAdapter.stopSelectMode();
+                }
+                return  true;
+            }
+        });*/
+
 
         mDatabaseReferance = FirebaseDatabase.getInstance().getReference("Notes");
         mStorage = FirebaseStorage.getInstance();
@@ -122,13 +135,23 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         fragmentManager.beginTransaction().replace(R.id.container, new BrowseNotesFragment()).commit();*/
 
 
-        fab.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), MainActivity.class)));
+        fab.setOnClickListener(v -> {
+            if (noteAdapter.isSelectMode()) {
+                deleteSelectedNotes();
+            } else {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            }
+
+        });
 
 
     }
 
     @Override
     public void onRefresh() {
+        if (noteAdapter.isSelectMode()) {
+            noteAdapter.stopSelectMode();
+        }
         noteAdapter.notifyDataSetChanged();
         recyclerView.scheduleLayoutAnimation();
         mSwipeRefreshLayout.setRefreshing(false);
@@ -159,7 +182,11 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 return true;
 
             case R.id.action_delete:
-
+                if (!noteAdapter.isSelectMode()) {
+                    noteAdapter.startSelectMode();
+                } else {
+                    noteAdapter.stopSelectMode();
+                }
                 return true;
         }
 
@@ -207,6 +234,25 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
             }
         });
         return true;
+    }
+
+    private void deleteSelectedNotes() {
+        for (int i = 0; i < recyclerView.getChildCount(); ++i) {
+            NoteAdapter.MyViewHolder holder = (NoteAdapter.MyViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+            if (holder.isSelected) {
+                Note note = mNotes.get(holder.getAdapterPosition());
+                StorageReference storageReference = mStorage.getReferenceFromUrl(note.getNoteUrl());
+                storageReference.delete().addOnSuccessListener(aVoid -> {
+                    mDatabaseReferance.child(note.getKey()).removeValue();
+                }).addOnFailureListener(e -> {
+
+                });
+            }
+        }
+
+        if (noteAdapter.isSelectMode()) {
+            noteAdapter.stopSelectMode();
+        }
     }
 
 }

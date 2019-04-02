@@ -7,15 +7,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.jgabrielfreitas.core.BlurImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -29,6 +32,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
     private OnNoteClickListener listener;
     private DatabaseReference mDatabaseReference;
     private Context context;
+    private boolean selectMode = false;
 
 
     public NoteAdapter(Context context, List<Note> notes, OnNoteClickListener listener) {
@@ -37,6 +41,20 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         this.filteredNotes = notes;
         this.listener = listener;
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
+    }
+
+    public boolean isSelectMode() {
+        return this.selectMode;
+    }
+
+    public void startSelectMode() {
+        selectMode = true;
+        notifyDataSetChanged();
+    }
+
+    public void stopSelectMode() {
+        selectMode = false;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -89,6 +107,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.bind(colorList.get(position), listener);*/
         holder.textViewTitle.setText(filteredNotes.get(position).getName());
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
+        holder.isSelected = false;
         if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
         } else {
@@ -97,7 +116,24 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().centerInside().into(holder.image, new Callback() {
             @Override
             public void onSuccess() {
-                holder.loadingSpinner.setVisibility(View.GONE);
+                Animation fadeOutAnim = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+                fadeOutAnim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        holder.loadingSpinner.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                holder.loadingSpinner.startAnimation(fadeOutAnim);
                 holder.isLoaded = true;
             }
 
@@ -108,7 +144,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         });
 
         holder.image.setOnClickListener(v -> {
-            if (holder.isLoaded) {
+            if (holder.isLoaded && !selectMode) {
                 Intent intent = new Intent(context, NoteViewActivity.class);
                 intent.putExtra("note_url", filteredNotes.get(position).getNoteUrl());
                 intent.putExtra("note_key", filteredNotes.get(position).getKey());
@@ -130,6 +166,47 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
             }
         });
 
+        if (selectMode) {
+
+            holder.selectCheckbox.setVisibility(View.VISIBLE);
+
+            Animation fadeInAnim = AnimationUtils.loadAnimation(context,R.anim.chechbox_fadein_anim);
+            holder.selectCheckbox.startAnimation(fadeInAnim);
+
+        } else {
+           Animation fadeOutAnim = AnimationUtils.loadAnimation(context,R.anim.chechbox_fadeout_anim);
+           fadeOutAnim.setAnimationListener(new Animation.AnimationListener() {
+               @Override
+               public void onAnimationStart(Animation animation) {
+
+               }
+
+               @Override
+               public void onAnimationEnd(Animation animation) {
+                   holder.selectCheckbox.setVisibility(View.GONE);
+
+               }
+
+               @Override
+               public void onAnimationRepeat(Animation animation) {
+
+               }
+           });
+           holder.selectCheckbox.startAnimation(fadeOutAnim);
+        }
+
+        holder.selectCheckbox.setOnClickListener(v -> {
+            if(selectMode) {
+                if (holder.selectCheckbox.isChecked()) {
+                    holder.isSelected = true;
+                    holder.image.setBlur(2);
+                } else {
+                    holder.isSelected = false;
+                    holder.image.setBlur(0);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -146,10 +223,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
         public TextView textViewTitle;
         public TextView textViewDate;
-        public ImageView image;
+        public BlurImageView image;
         public ImageButton favButton;
         public SpinKitView loadingSpinner;
+        public CheckBox selectCheckbox;
         public boolean isLoaded = false;
+        public boolean isSelected = false;
 
         public MyViewHolder(View v) {
             super(v);
@@ -158,6 +237,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
             image = v.findViewById(R.id.note_image);
             favButton = v.findViewById(R.id.favourite_button);
             loadingSpinner = v.findViewById(R.id.spin_kit);
+            selectCheckbox = v.findViewById(R.id.select_checkbox);
+
         }
 
         public void bind(final Note note, final OnNoteClickListener listener) {

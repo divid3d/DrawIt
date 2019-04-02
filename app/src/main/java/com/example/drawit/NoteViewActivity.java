@@ -136,5 +136,7 @@ public class NoteViewActivity extends AppCompatActivity {
     private void shareImage(){
 
     }
+
+
 }
 

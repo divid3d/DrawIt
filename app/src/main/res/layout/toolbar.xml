@@ -5,6 +5,6 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/colorPrimary"
     android:theme="@style/ToolbarTheme"
-    app:layout_scrollFlags="scroll">
+    app:layout_scrollFlags="scroll|enterAlways">
 
 </android.support.v7.widget.Toolbar>

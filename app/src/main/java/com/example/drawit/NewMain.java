@@ -172,7 +172,6 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
 
             case R.id.action_sort_by_name:
                 sortedByDate = false;
-                sortedByFavourites = false;
                 if (!sortedByName) {
                     Collections.sort(mNotes, (n1, n2) -> n1.getName().trim().toLowerCase().compareTo(n2.getName().trim().toLowerCase()));
                     sortedByName = true;
@@ -183,8 +182,33 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 noteAdapter.notifyDataSetChanged();
                 return true;
 
+            case R.id.action_sort_by_date:
+                sortedByName = false;
+                if (!sortedByDate) {
+                    Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n1.getDate()) - Utills.dateToMillis(n2.getDate())));
+                    sortedByDate = true;
+                } else {
+                    Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n2.getDate()) - Utills.dateToMillis(n1.getDate())));
+                    sortedByDate = false;
+                }
+                noteAdapter.notifyDataSetChanged();
+                return true;
 
             case R.id.action_sort_by_favourites:
+                sortedByName = false;
+                sortedByDate = false;
+
+                Collections.sort(mNotes, (n1, n2) -> {
+                    if (n1.isFavourite() == n2.isFavourite()) {
+                        return n1.getName().compareTo(n2.getName());
+                    } else {
+                        if (n1.isFavourite() && !n2.isFavourite()) {
+                            return -1;
+                        }
+                        return 1;
+                    }
+                });
+                noteAdapter.notifyDataSetChanged();
                 return true;
 
             case R.id.action_delete:
@@ -201,11 +225,11 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                     noteAdapter.stopSelectMode();
                     invalidateOptionsMenu();
                 }
-                return  true;
+                return true;
 
             case R.id.action_stop_select_mode:
 
-                if(noteAdapter.isSelectMode()){
+                if (noteAdapter.isSelectMode()) {
                     noteAdapter.stopSelectMode();
                     invalidateOptionsMenu();
                 }

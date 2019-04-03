@@ -22,9 +22,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 
 import java.io.ByteArrayOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -176,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "File uploaded successfully", Toast.LENGTH_SHORT).show();
                         fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
                             String url = uri.toString();
-                            Note note = new Note(noteName.trim(), millisToDate(taskSnapshot.getMetadata().getCreationTimeMillis()), url);
+                            Note note = new Note(noteName.trim(),Utills.millisToDate(taskSnapshot.getMetadata().getCreationTimeMillis()), url);
                             String uploadId = mDatabaseReference.push().getKey();
                             mDatabaseReference.child(uploadId).setValue(note);
                             loadingDialog.dismiss();
@@ -194,12 +192,6 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
-    }
-
-    private String millisToDate(long millis) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Date resultDate = new Date(millis);
-        return sdf.format(resultDate);
     }
 
 }

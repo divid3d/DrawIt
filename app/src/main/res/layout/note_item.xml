@@ -76,32 +76,32 @@
                 android:layout_weight="6">
 
                 <TextView
-                    android:textSize="20sp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
                     android:id="@+id/note_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:fontFamily="@font/product_sans_bold"
                     android:gravity="start"
+                    android:singleLine="true"
                     android:text="note name"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:minLines="2"
-                    android:maxLines="2"
                     android:id="@+id/note_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/note_title"
                     android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
                     android:fontFamily="@font/product_sans_italic"
                     android:gravity="start"
+                    android:maxLines="2"
+                    android:minLines="2"
                     android:text="note date"
                     android:textColor="@android:color/white"
                     android:textSize="12sp" />

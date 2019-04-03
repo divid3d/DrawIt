@@ -3,6 +3,10 @@ package com.example.drawit;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,17 +33,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
     private List<Note> notes;
     private List<Note> filteredNotes;
-    private OnNoteClickListener listener;
+    private OnSelectModeEnabled selectModeListiner;
     private DatabaseReference mDatabaseReference;
     private Context context;
     private boolean selectMode = false;
 
 
-    public NoteAdapter(Context context, List<Note> notes, OnNoteClickListener listener) {
+    public NoteAdapter(Context context, List<Note> notes, OnSelectModeEnabled listener) {
         this.context = context;
         this.notes = notes;
         this.filteredNotes = notes;
-        this.listener = listener;
+        this.selectModeListiner = listener;
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
     }
 
@@ -108,14 +112,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.textViewTitle.setText(filteredNotes.get(position).getName());
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
         holder.isSelected = false;
+
         if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
         } else {
             holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
         }
-        Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().centerInside().into(holder.image, new Callback() {
+        Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().centerCrop().into(holder.image, new Callback() {
             @Override
             public void onSuccess() {
+                holder.image.setBlur(0);
+                holder.image.setColorFilter(null);
                 Animation fadeOutAnim = AnimationUtils.loadAnimation(context, R.anim.fade_out);
                 fadeOutAnim.setAnimationListener(new Animation.AnimationListener() {
                     @Override
@@ -155,56 +162,55 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         });
 
         holder.favButton.setOnClickListener(v -> {
-            if (!filteredNotes.get(position).isFavourite()) {
-                mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(true);
-                filteredNotes.get(position).setFavourite(true);
-                holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
-            } else {
-                mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(false);
-                filteredNotes.get(position).setFavourite(false);
-                holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
+            if (!selectMode) {
+                if (!filteredNotes.get(position).isFavourite()) {
+                    mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(true);
+                    filteredNotes.get(position).setFavourite(true);
+                    holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
+                } else {
+                    mDatabaseReference.child(filteredNotes.get(position).getKey()).child("favourite").setValue(false);
+                    filteredNotes.get(position).setFavourite(false);
+                    holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
+                }
             }
         });
 
         if (selectMode) {
-
-            holder.selectCheckbox.setVisibility(View.VISIBLE);
-
-            Animation fadeInAnim = AnimationUtils.loadAnimation(context,R.anim.chechbox_fadein_anim);
+            Animation fadeInAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadein_anim);
             holder.selectCheckbox.startAnimation(fadeInAnim);
 
         } else {
-           Animation fadeOutAnim = AnimationUtils.loadAnimation(context,R.anim.chechbox_fadeout_anim);
-           fadeOutAnim.setAnimationListener(new Animation.AnimationListener() {
-               @Override
-               public void onAnimationStart(Animation animation) {
-
-               }
-
-               @Override
-               public void onAnimationEnd(Animation animation) {
-                   holder.selectCheckbox.setVisibility(View.GONE);
-
-               }
-
-               @Override
-               public void onAnimationRepeat(Animation animation) {
-
-               }
-           });
-           holder.selectCheckbox.startAnimation(fadeOutAnim);
+            Animation fadeOutAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadeout_anim);
+            holder.selectCheckbox.startAnimation(fadeOutAnim);
         }
 
         holder.selectCheckbox.setOnClickListener(v -> {
-            if(selectMode) {
+            if (selectMode) {
                 if (holder.selectCheckbox.isChecked()) {
                     holder.isSelected = true;
                     holder.image.setBlur(2);
+                    // holder.image.setColorFilter(new PorterDuffColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY));
+                    holder.image.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(context, R.color.colorShadow), PorterDuff.Mode.MULTIPLY));
+
+
                 } else {
                     holder.isSelected = false;
                     holder.image.setBlur(0);
+                    holder.image.setColorFilter(null);
+
                 }
             }
+        });
+
+        holder.noteLaytout.setOnLongClickListener(v -> {
+            if (!selectMode) {
+                startSelectMode();
+                //fire listener to activity to change toolbar
+                if (selectModeListiner != null) {
+                    selectModeListiner.onSelectMode(isSelectMode());
+                }
+            }
+            return true;
         });
 
     }
@@ -215,8 +221,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
     }
 
 
-    public interface OnNoteClickListener {
-        void onItemClick(Color color);
+    public interface OnSelectModeEnabled {
+        void onSelectMode(boolean isEnabled);
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
@@ -227,26 +233,21 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         public ImageButton favButton;
         public SpinKitView loadingSpinner;
         public CheckBox selectCheckbox;
+        public CardView noteLaytout;
         public boolean isLoaded = false;
         public boolean isSelected = false;
 
         public MyViewHolder(View v) {
             super(v);
             textViewTitle = v.findViewById(R.id.note_title);
+            textViewTitle.setSelected(true);
             textViewDate = v.findViewById(R.id.note_date);
             image = v.findViewById(R.id.note_image);
             favButton = v.findViewById(R.id.favourite_button);
             loadingSpinner = v.findViewById(R.id.spin_kit);
             selectCheckbox = v.findViewById(R.id.select_checkbox);
+            noteLaytout = v.findViewById(R.id.note_layout);
 
-        }
-
-        public void bind(final Note note, final OnNoteClickListener listener) {
-
-            itemView.setOnClickListener(v -> {
-                //listener.onItemClick();
-
-            });
         }
     }
 }

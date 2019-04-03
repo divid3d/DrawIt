@@ -85,7 +85,12 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         recyclerView = findViewById(R.id.notes_recycler_view);
-        noteAdapter = new NoteAdapter(getApplicationContext(), mNotes, null);
+        noteAdapter = new NoteAdapter(getApplicationContext(), mNotes, new NoteAdapter.OnSelectModeEnabled() {
+            @Override
+            public void onSelectMode(boolean isEnabled) {
+                invalidateOptionsMenu();
+            }
+        });
         recyclerView.setAdapter(noteAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setHasFixedSize(true);
@@ -136,10 +141,10 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
 
 
         fab.setOnClickListener(v -> {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             if (noteAdapter.isSelectMode()) {
-                deleteSelectedNotes();
-            } else {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                noteAdapter.stopSelectMode();
+                invalidateOptionsMenu();
             }
 
         });
@@ -151,6 +156,7 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
     public void onRefresh() {
         if (noteAdapter.isSelectMode()) {
             noteAdapter.stopSelectMode();
+            invalidateOptionsMenu();
         }
         noteAdapter.notifyDataSetChanged();
         recyclerView.scheduleLayoutAnimation();
@@ -188,6 +194,23 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                     noteAdapter.stopSelectMode();
                 }
                 return true;
+
+            case R.id.action_delete_selected:
+                if (noteAdapter.isSelectMode()) {
+                    deleteSelectedNotes();
+                    noteAdapter.stopSelectMode();
+                    invalidateOptionsMenu();
+                }
+                return  true;
+
+            case R.id.action_stop_select_mode:
+
+                if(noteAdapter.isSelectMode()){
+                    noteAdapter.stopSelectMode();
+                    invalidateOptionsMenu();
+                }
+
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -200,39 +223,48 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
             mSearchView.setIconified(true);
             mSearchView.clearFocus();
             return;
+        } else if (noteAdapter.isSelectMode()) {
+            noteAdapter.stopSelectMode();
+            invalidateOptionsMenu();
+        } else {
+            super.onBackPressed();
         }
-        super.onBackPressed();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.browser_menu, menu);
+        if (!noteAdapter.isSelectMode()) {
+            getMenuInflater().inflate(R.menu.browser_menu, menu);
 
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        mSearchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.action_search)
-                .getActionView();
-        mSearchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-        mSearchView.setMaxWidth(Integer.MAX_VALUE);
-        mSearchView.setQueryHint("Search for note...");
+            // Associate searchable configuration with the SearchView
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            mSearchView = (android.support.v7.widget.SearchView) menu.findItem(R.id.action_search)
+                    .getActionView();
+            mSearchView.setSearchableInfo(searchManager
+                    .getSearchableInfo(getComponentName()));
+            mSearchView.setMaxWidth(Integer.MAX_VALUE);
+            mSearchView.setQueryHint("Search for note...");
 
-        // listening to search query text change
-        mSearchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // filter recycler view when query submitted
-                noteAdapter.getFilter().filter(query);
-                return false;
-            }
+            // listening to search query text change
+            mSearchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    // filter recycler view when query submitted
+                    noteAdapter.getFilter().filter(query);
+                    return false;
+                }
 
-            @Override
-            public boolean onQueryTextChange(String query) {
-                // filter recycler view when text is changed
-                noteAdapter.getFilter().filter(query);
-                return true;
-            }
-        });
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    // filter recycler view when text is changed
+                    noteAdapter.getFilter().filter(query);
+                    return true;
+                }
+            });
+        } else {
+            getMenuInflater().inflate(R.menu.select_mode_menu, menu);
+
+        }
         return true;
     }
 

@@ -6,14 +6,23 @@
     android:layout_height="match_parent"
     android:background="#E4E4E4"
     tools:context=".NewMain">
+    
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar" />
+        <include
+            android:id="@id/toolbar"
+            layout="@layout/toolbar" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
 
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/toolbar_layout"
         android:theme="@style/AppTheme"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"

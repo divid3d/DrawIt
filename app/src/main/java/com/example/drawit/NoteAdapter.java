@@ -53,11 +53,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
     public void startSelectMode() {
         selectMode = true;
+        if(selectModeListiner!=null) {
+            selectModeListiner.onSelectMode(selectMode);
+        }
         notifyDataSetChanged();
     }
 
     public void stopSelectMode() {
         selectMode = false;
+        if(selectModeListiner!=null) {
+            selectModeListiner.onSelectMode(selectMode);
+        }
         notifyDataSetChanged();
     }
 
@@ -112,6 +118,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.textViewTitle.setText(filteredNotes.get(position).getName());
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
         holder.isSelected = false;
+        holder.isLoaded = false;
 
         if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
@@ -205,6 +212,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.noteLaytout.setOnLongClickListener(v -> {
             if (!selectMode) {
                 startSelectMode();
+                notifyDataSetChanged();
                 //fire listener to activity to change toolbar
                 if (selectModeListiner != null) {
                     selectModeListiner.onSelectMode(isSelectMode());

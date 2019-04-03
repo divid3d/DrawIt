@@ -117,8 +117,7 @@
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:src="@drawable/image_btn_src"
-                android:stateListAnimator="@animator/scale" />
+                android:src="@drawable/image_btn_src" />
         </LinearLayout>
 
 

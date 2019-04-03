@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -89,6 +90,16 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
             @Override
             public void onSelectMode(boolean isEnabled) {
                 invalidateOptionsMenu();
+                AppBarLayout.LayoutParams params =
+                        (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
+                mSwipeRefreshLayout.setRefreshing(false);
+                mSwipeRefreshLayout.setEnabled(false);
+                if (noteAdapter.isSelectMode()) {
+                    params.setScrollFlags(0);
+                } else {
+                    params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+                }
             }
         });
         recyclerView.setAdapter(noteAdapter);

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -19,33 +21,42 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/refresh_layout"
+    <FrameLayout
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_layout"
-        android:theme="@style/AppTheme">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/notes_recycler_view"
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/refresh_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layoutAnimation="@anim/layout_animation_fall_dawn" />
-    </android.support.v4.widget.SwipeRefreshLayout>
+            android:theme="@style/AppTheme">
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/notes_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layoutAnimation="@anim/layout_animation_fall_dawn" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+
+    </FrameLayout>
     <android.support.design.widget.FloatingActionButton
+        app:layout_anchor="@id/container"
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_anchorGravity="bottom|right"
+        android:layout_gravity="end|bottom"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:src="@drawable/ic_cloud_upload_black_24dp"
         app:fabSize="normal"
-        app:layout_anchor="@+id/refresh_layout"
-        app:layout_anchorGravity="right|bottom"
         app:useCompatPadding="true" />
 
 </android.support.design.widget.CoordinatorLayout>

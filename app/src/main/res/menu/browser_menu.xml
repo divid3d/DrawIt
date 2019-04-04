@@ -12,13 +12,6 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_delete"
-        android:icon="@drawable/ic_baseline_delete_forever_24px"
-        android:orderInCategory="100"
-        android:title="action_delete"
-        app:showAsAction="always" />
-
-    <item
         android:id="@+id/action_sort"
         android:icon="@drawable/ic_sort_black_24dp"
         android:orderInCategory="100"

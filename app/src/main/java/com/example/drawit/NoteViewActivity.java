@@ -3,8 +3,10 @@ package com.example.drawit;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -105,6 +107,22 @@ public class NoteViewActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.view_menu, menu);
+        if(getIntent().getBooleanExtra("note_favourite",false)){
+            menu.getItem(0).setIcon(ContextCompat.getDrawable(this  , R.drawable.ic_fav_checked_24dp));
+        }
+
+        menu.getItem(0).getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        return true;
     }
 
     private void deleteNote() {

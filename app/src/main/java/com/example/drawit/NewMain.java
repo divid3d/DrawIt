@@ -93,10 +93,12 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 AppBarLayout.LayoutParams params =
                         (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
                 mSwipeRefreshLayout.setRefreshing(false);
-                mSwipeRefreshLayout.setEnabled(false);
                 if (noteAdapter.isSelectMode()) {
                     params.setScrollFlags(0);
+                    mSwipeRefreshLayout.setEnabled(false);
+
                 } else {
+                    mSwipeRefreshLayout.setEnabled(true);
                     params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
                             | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
                 }
@@ -105,40 +107,33 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         recyclerView.setAdapter(noteAdapter);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         recyclerView.setHasFixedSize(true);
-
-        /*recyclerView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if(noteAdapter.isSelectMode()){
-                    noteAdapter.startSelectMode();
-                }else{
-                    noteAdapter.stopSelectMode();
-                }
-                return  true;
-            }
-        });*/
-
-
         mDatabaseReferance = FirebaseDatabase.getInstance().getReference("Notes");
         mStorage = FirebaseStorage.getInstance();
         mDatabaseReferance.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mNotes.clear();
+                List<Note> tempNotes = new ArrayList<>();
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Note note = postSnapshot.getValue(Note.class);
                     note.setKey(postSnapshot.getKey());
                     mNotes.add(note);
                 }
 
+                if (sortedByName) {
+                    sortNotesByName(mNotes);
+                } else if (sortedByDate) {
+                    sortNotesByDate(mNotes);
+                } else if (sortedByFavourites) {
+                    sortNotesByFavourites(mNotes);
+                } else {
+                    noteAdapter.notifyDataSetChanged();
+                }
 
-                noteAdapter.notifyDataSetChanged();
                 if (initRecyclerViewAnimation) {
                     initRecyclerViewAnimation = false;
                     recyclerView.scheduleLayoutAnimation();
                 }
                 mSwipeRefreshLayout.setRefreshing(false);
-
             }
 
 
@@ -147,9 +142,6 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        /*fragmentManager = this.getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, new BrowseNotesFragment()).commit();*/
-
 
         fab.setOnClickListener(v -> {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
@@ -182,52 +174,15 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
                 return true;
 
             case R.id.action_sort_by_name:
-                sortedByDate = false;
-                if (!sortedByName) {
-                    Collections.sort(mNotes, (n1, n2) -> n1.getName().trim().toLowerCase().compareTo(n2.getName().trim().toLowerCase()));
-                    sortedByName = true;
-                } else {
-                    Collections.sort(mNotes, (n1, n2) -> n2.getName().trim().toLowerCase().compareTo(n1.getName().trim().toLowerCase()));
-                    sortedByName = false;
-                }
-                noteAdapter.notifyDataSetChanged();
+                sortNotesByName(mNotes);
                 return true;
 
             case R.id.action_sort_by_date:
-                sortedByName = false;
-                if (!sortedByDate) {
-                    Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n1.getDate()) - Utills.dateToMillis(n2.getDate())));
-                    sortedByDate = true;
-                } else {
-                    Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n2.getDate()) - Utills.dateToMillis(n1.getDate())));
-                    sortedByDate = false;
-                }
-                noteAdapter.notifyDataSetChanged();
+                sortNotesByDate(mNotes);
                 return true;
 
             case R.id.action_sort_by_favourites:
-                sortedByName = false;
-                sortedByDate = false;
-
-                Collections.sort(mNotes, (n1, n2) -> {
-                    if (n1.isFavourite() == n2.isFavourite()) {
-                        return n1.getName().compareTo(n2.getName());
-                    } else {
-                        if (n1.isFavourite() && !n2.isFavourite()) {
-                            return -1;
-                        }
-                        return 1;
-                    }
-                });
-                noteAdapter.notifyDataSetChanged();
-                return true;
-
-            case R.id.action_delete:
-                if (!noteAdapter.isSelectMode()) {
-                    noteAdapter.startSelectMode();
-                } else {
-                    noteAdapter.stopSelectMode();
-                }
+                sortNotesByFavourites(mNotes);
                 return true;
 
             case R.id.action_delete_selected:
@@ -309,10 +264,7 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
             if (holder.isSelected) {
                 Note note = mNotes.get(holder.getAdapterPosition());
                 StorageReference storageReference = mStorage.getReferenceFromUrl(note.getNoteUrl());
-                storageReference.delete().addOnSuccessListener(aVoid -> {
-                    mDatabaseReferance.child(note.getKey()).removeValue();
-                }).addOnFailureListener(e -> {
-
+                storageReference.delete().addOnSuccessListener(aVoid -> mDatabaseReferance.child(note.getKey()).removeValue()).addOnFailureListener(e -> {
                 });
             }
         }
@@ -322,4 +274,43 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         }
     }
 
+    private void sortNotesByName(List<Note> notes) {
+        sortedByDate = false;
+        if (!sortedByName) {
+            Collections.sort(mNotes, (n1, n2) -> n1.getName().trim().toLowerCase().compareTo(n2.getName().trim().toLowerCase()));
+            sortedByName = true;
+        } else {
+            Collections.sort(mNotes, (n1, n2) -> n2.getName().trim().toLowerCase().compareTo(n1.getName().trim().toLowerCase()));
+            sortedByName = false;
+        }
+        noteAdapter.notifyDataSetChanged();
+    }
+
+    private void sortNotesByDate(List<Note> notes) {
+        sortedByName = false;
+        if (!sortedByDate) {
+            Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n1.getDate()) - Utills.dateToMillis(n2.getDate())));
+            sortedByDate = true;
+        } else {
+            Collections.sort(mNotes, (n1, n2) -> (int) (Utills.dateToMillis(n2.getDate()) - Utills.dateToMillis(n1.getDate())));
+            sortedByDate = false;
+        }
+        noteAdapter.notifyDataSetChanged();
+    }
+
+    private void sortNotesByFavourites(List<Note> notes) {
+        sortedByName = false;
+        sortedByDate = false;
+        Collections.sort(mNotes, (n1, n2) -> {
+            if (n1.isFavourite() == n2.isFavourite()) {
+                return n1.getName().compareTo(n2.getName());
+            } else {
+                if (n1.isFavourite() && !n2.isFavourite()) {
+                    return -1;
+                }
+                return 1;
+            }
+        });
+        noteAdapter.notifyDataSetChanged();
+    }
 }

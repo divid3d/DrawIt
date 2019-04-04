@@ -119,6 +119,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
         holder.isSelected = false;
         holder.isLoaded = false;
+        holder.selectCheckbox.setVisibility(View.GONE);
 
         if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
@@ -163,8 +164,8 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
                 intent.putExtra("note_url", filteredNotes.get(position).getNoteUrl());
                 intent.putExtra("note_key", filteredNotes.get(position).getKey());
                 intent.putExtra("note_name", filteredNotes.get(position).getName());
+                intent.putExtra("note_favourite",filteredNotes.get(position).isFavourite());
                 context.startActivity(intent);
-                //Toast.makeText(context,String.valueOf(notes.get(position).getName()), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -183,12 +184,33 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         });
 
         if (selectMode) {
-            Animation fadeInAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadein_anim);
-            holder.selectCheckbox.startAnimation(fadeInAnim);
+            if(holder.selectCheckbox.getVisibility() == View.GONE) {
+                holder.selectCheckbox.setVisibility(View.VISIBLE);
+                Animation fadeInAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadein_anim);
+                holder.selectCheckbox.startAnimation(fadeInAnim);
+            }
 
         } else {
-            Animation fadeOutAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadeout_anim);
-            holder.selectCheckbox.startAnimation(fadeOutAnim);
+            if(holder.selectCheckbox.getVisibility() != View.GONE) {
+                Animation fadeOutAnim = AnimationUtils.loadAnimation(context, R.anim.chechbox_fadeout_anim);
+                fadeOutAnim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                    holder.selectCheckbox.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                holder.selectCheckbox.startAnimation(fadeOutAnim);
+            }
         }
 
         holder.selectCheckbox.setOnClickListener(v -> {

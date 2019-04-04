@@ -1,6 +1,5 @@
 package com.example.drawit;
 
-import android.graphics.drawable.Drawable;
 
 public class Note {
     private String name;
@@ -12,6 +11,7 @@ public class Note {
     public Note() {
         //empty constructor
     }
+
 
     public Note(String name, String date, String noteUrl) {
         if (name.trim().equals("")) {

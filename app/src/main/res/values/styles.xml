@@ -10,7 +10,7 @@
     </style>
 
     <style name="ToolbarTheme" parent="AppTheme">
-        <item name="android:fontFamily">@font/pacifico</item>
+        <item name="android:fontFamily">@font/product_sans_bold</item>
     </style>
 
 

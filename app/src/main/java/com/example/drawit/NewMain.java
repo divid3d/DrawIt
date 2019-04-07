@@ -4,11 +4,13 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +18,9 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -65,6 +70,10 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         mToolbar.setTitleTextColor(Color.WHITE);
 
         setSupportActionBar(mToolbar);
+        setAppBarTitle();
+
+        getWindow().setExitTransition(null);
+
         fab = findViewById(R.id.fab);
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
@@ -86,7 +95,7 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         recyclerView = findViewById(R.id.notes_recycler_view);
-        noteAdapter = new NoteAdapter(getApplicationContext(), mNotes, new NoteAdapter.OnSelectModeEnabled() {
+        noteAdapter = new NoteAdapter(this, mNotes, new NoteAdapter.OnSelectModeEnabled() {
             @Override
             public void onSelectMode(boolean isEnabled) {
                 invalidateOptionsMenu();
@@ -144,12 +153,24 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         });
 
         fab.setOnClickListener(v -> {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            startActivity(new Intent(this,MainActivity.class));
             if (noteAdapter.isSelectMode()) {
                 noteAdapter.stopSelectMode();
                 invalidateOptionsMenu();
             }
 
+        });
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
+            }
         });
 
 
@@ -313,4 +334,19 @@ public class NewMain extends AppCompatActivity implements SwipeRefreshLayout.OnR
         });
         noteAdapter.notifyDataSetChanged();
     }
+
+
+    public void setAppBarTitle(){
+        TextView tv = new TextView(getApplicationContext());
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
+        tv.setLayoutParams(lp);
+        tv.setText("DrawIt!");
+        tv.setTextSize(20);
+        tv.setTextColor(Color.parseColor("#FFFFFF"));
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/pacifico.ttf");
+        tv.setTypeface(tf);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(tv);
+    }
+
 }

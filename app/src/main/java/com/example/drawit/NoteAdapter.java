@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -115,11 +117,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
         /*holder.relativeLayout.getBackground().setColorFilter(colorList.get(position).getColor(), PorterDuff.Mode.MULTIPLY);
         holder.bind(colorList.get(position), listener);*/
+        ViewCompat.setTransitionName(holder.image, notes.get(position).getName());
         holder.textViewTitle.setText(filteredNotes.get(position).getName());
         holder.textViewDate.setText(filteredNotes.get(position).getDate());
         holder.isSelected = false;
         holder.isLoaded = false;
         holder.selectCheckbox.setVisibility(View.GONE);
+
 
         if (filteredNotes.get(position).isFavourite()) {
             holder.favButton.setImageResource(R.drawable.ic_fav_checked_24dp);
@@ -160,12 +164,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
 
         holder.image.setOnClickListener(v -> {
             if (holder.isLoaded && !selectMode) {
-                Intent intent = new Intent(context, NoteViewActivity.class);
+                /*Intent intent = new Intent(context, NoteViewActivity.class);
                 intent.putExtra("note_url", filteredNotes.get(position).getNoteUrl());
                 intent.putExtra("note_key", filteredNotes.get(position).getKey());
                 intent.putExtra("note_name", filteredNotes.get(position).getName());
                 intent.putExtra("note_favourite",filteredNotes.get(position).isFavourite());
-                context.startActivity(intent);
+                context.startActivity(intent);*/
+                openActivityWithTransition(position, holder.image);
             }
         });
 
@@ -279,5 +284,19 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
             noteLaytout = v.findViewById(R.id.note_layout);
 
         }
+    }
+
+
+    public void openActivityWithTransition(int position, BlurImageView sharedImageView) {
+        Intent intent = new Intent(context, NoteViewActivity.class);
+        intent.putExtra("note_url", filteredNotes.get(position).getNoteUrl());
+        intent.putExtra("note_key", filteredNotes.get(position).getKey());
+        intent.putExtra("note_name", filteredNotes.get(position).getName());
+        intent.putExtra("note_favourite",filteredNotes.get(position).isFavourite());
+        intent.putExtra("note_transition_name", ViewCompat.getTransitionName(sharedImageView));
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((NewMain)context,sharedImageView,ViewCompat.getTransitionName(sharedImageView));
+
+        context.startActivity(intent, options.toBundle());
     }
 }

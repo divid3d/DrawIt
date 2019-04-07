@@ -1,7 +1,9 @@
 package com.example.drawit;
 
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -13,6 +15,8 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -45,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+
         drawView = findViewById(R.id.draw_view);
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -53,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.main_toolbar);
         mToolbar.setTitleTextColor(android.graphics.Color.WHITE);
         setSupportActionBar(mToolbar);
+        setAppBarTitle();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
 
@@ -108,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
     private void shareImage() {
         /*rxPermissions
@@ -194,4 +203,16 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
+    public void setAppBarTitle(){
+        TextView tv = new TextView(getApplicationContext());
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
+        tv.setLayoutParams(lp);
+        tv.setText("DrawIt!");
+        tv.setTextSize(20);
+        tv.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/pacifico.ttf");
+        tv.setTypeface(tf);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        getSupportActionBar().setCustomView(tv);
+    }
 }

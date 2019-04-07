@@ -1,81 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".NoteViewActivity">
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar" />
+
     <RelativeLayout
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar">
 
         <RelativeLayout
             android:id="@+id/note_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@id/button_layout"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_above="@id/button_layout">
+            android:layout_alignParentTop="true">
 
-            <ImageView
+            <com.jgabrielfreitas.core.BlurImageView
                 android:id="@+id/note_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:radius="0" />
 
             <com.github.ybq.android.spinkit.SpinKitView
-                android:layout_centerInParent="true"
                 android:id="@+id/spin_kit"
                 style="@style/SpinKitView.Large.Circle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:layout_gravity="center"
-                app:SpinKit_Color="@color/colorPrimary"
-                />
+                app:SpinKit_Color="@color/colorPrimary" />
 
         </RelativeLayout>
 
 
-
         <LinearLayout
-            android:background="@color/colorPrimary"
             android:id="@+id/button_layout"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:background="@color/colorPrimary"
             android:orientation="horizontal">
 
             <ImageButton
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:layout_weight="1"
                 android:id="@+id/delete_button"
-                android:src="@drawable/ic_baseline_delete_forever_24px"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_baseline_delete_forever_24px" />
 
             <ImageButton
-                android:layout_gravity="center"
-                android:background="@android:color/transparent"
-                android:layout_weight="1"
-                android:src="@drawable/ic_baseline_share_24px"
                 android:id="@+id/share_button"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_baseline_share_24px" />
 
         </LinearLayout>
 
     </RelativeLayout>
-
-
-
-
-
-
 
 </RelativeLayout>

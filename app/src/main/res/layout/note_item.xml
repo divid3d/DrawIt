@@ -12,7 +12,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary">
+        android:background="@android:color/white">
 
         <RelativeLayout
             android:id="@+id/image_layout"
@@ -64,8 +64,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/image_layout"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:background="@color/colorPrimary"
             android:orientation="horizontal">
 
@@ -76,11 +74,12 @@
                 android:layout_weight="6">
 
                 <TextView
+                    android:layout_marginStart="8dp"
                     android:id="@+id/note_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="8dp"
                     android:ellipsize="marquee"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -92,6 +91,7 @@
                     android:textSize="20sp" />
 
                 <TextView
+                    android:layout_marginStart="8dp"
                     android:id="@+id/note_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -111,6 +111,7 @@
 
 
             <ImageButton
+                android:layout_marginEnd="8dp"
                 android:id="@+id/favourite_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

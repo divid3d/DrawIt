@@ -97,7 +97,7 @@ public class NoteViewActivity extends AppCompatActivity {
         }
 
         if (noteUrl != null ) {
-            Picasso.get().load(noteUrl).noFade().fit().centerCrop().into(noteImageView, new Callback() {
+            Picasso.get().load(noteUrl).noFade().fit().into(noteImageView, new Callback() {
                 @Override
                 public void onSuccess() {
                     supportStartPostponedEnterTransition();

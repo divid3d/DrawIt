@@ -9,8 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -31,9 +34,12 @@ public class NoteViewActivity extends AppCompatActivity {
     private SpinKitView loadingIndicator;
     private FirebaseStorage mStorage;
     private DatabaseReference mDatabaseReferance;
+    private LinearLayout butonLayout;
     private ImageButton deleteButton;
     private ImageButton shareButton;
     private boolean isImageLoaded = false;
+    private ScaleGestureDetector mScaleGestureDetector;
+    private float mScaleFactor = 1.0f;
 
 
     @Override
@@ -49,6 +55,7 @@ public class NoteViewActivity extends AppCompatActivity {
         noteImageView = findViewById(R.id.note_view);
         deleteButton = findViewById(R.id.delete_button);
         shareButton = findViewById(R.id.share_button);
+        butonLayout = findViewById(R.id.button_layout);
 
         deleteButton.setOnClickListener(v -> {
             if (isImageLoaded) {
@@ -97,10 +104,11 @@ public class NoteViewActivity extends AppCompatActivity {
         }
 
         if (noteUrl != null ) {
-            Picasso.get().load(noteUrl).noFade().fit().into(noteImageView, new Callback() {
+            Picasso.get().load(noteUrl).noFade().fit().centerInside().into(noteImageView, new Callback() {
                 @Override
                 public void onSuccess() {
                     supportStartPostponedEnterTransition();
+
                     loadingIndicator.setVisibility(View.GONE);
                     isImageLoaded = true;
                 }
@@ -110,6 +118,25 @@ public class NoteViewActivity extends AppCompatActivity {
                     supportStartPostponedEnterTransition();
                 }
             });
+        }
+
+        mScaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mScaleGestureDetector.onTouchEvent(event);
+    }
+
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        // when a scale gesture is detected, use it to resize the image
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector){
+            mScaleFactor *= scaleGestureDetector.getScaleFactor();
+            noteImageView.setScaleX(mScaleFactor);
+            noteImageView.setScaleY(mScaleFactor);
+            return true;
         }
     }
 
@@ -167,5 +194,9 @@ public class NoteViewActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
 

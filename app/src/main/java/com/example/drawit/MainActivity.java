@@ -49,9 +49,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-
         drawView = findViewById(R.id.draw_view);
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -70,13 +67,15 @@ public class MainActivity extends AppCompatActivity {
         mColorPicker.setItemAnimator(new DefaultItemAnimator());
 
 
-        mColorAdapter = new ColorAdapter(colorListGenerator(50), new ColorAdapter.OnItemClickListener() {
+        List<Color> colors = colorListGenerator(50);
+        mColorAdapter = new ColorAdapter(colors, new ColorAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Color color) {
                 drawView.setCurrentColor(color.getColor());
             }
         });
         mColorPicker.setAdapter(mColorAdapter);
+        drawView.setCurrentColor(colors.get(0).getColor());
 
         mStorageReference = FirebaseStorage.getInstance().getReference("Notes");
         mDatabaseReference = FirebaseDatabase.getInstance().getReference("Notes");
@@ -146,12 +145,10 @@ public class MainActivity extends AppCompatActivity {
 
     public List<Color> colorListGenerator(int size) {
         List<Color> colorList = new ArrayList<>();
-        Random random = new Random();
-
+        Random r = new Random();
         for (int i = 0; i < size; i++) {
-            colorList.add(new Color(random.nextInt()));
+            colorList.add(new Color(android.graphics.Color.argb(255, r.nextInt(255), r.nextInt(255), r.nextInt(255))));
         }
-
         return colorList;
     }
 
@@ -176,14 +173,14 @@ public class MainActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
             StorageReference fileReference = mStorageReference.child(System.currentTimeMillis() + ".jpeg");
-            loadingDialog.setMessage("Uploading note "+noteName);
+            loadingDialog.setMessage("Uploading note " + noteName);
             loadingDialog.show();
             mUploadTask = fileReference.putBytes(data)
                     .addOnSuccessListener(taskSnapshot -> {
                         Toast.makeText(getApplicationContext(), "File uploaded successfully", Toast.LENGTH_SHORT).show();
                         fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
                             String url = uri.toString();
-                            Note note = new Note(noteName.trim(),Utills.millisToDate(taskSnapshot.getMetadata().getCreationTimeMillis()), url);
+                            Note note = new Note(noteName.trim(), Utills.millisToDate(taskSnapshot.getMetadata().getCreationTimeMillis()), url);
                             String uploadId = mDatabaseReference.push().getKey();
                             mDatabaseReference.child(uploadId).setValue(note);
                             loadingDialog.dismiss();
@@ -203,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void setAppBarTitle(){
+    public void setAppBarTitle() {
         TextView tv = new TextView(getApplicationContext());
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
         tv.setLayoutParams(lp);

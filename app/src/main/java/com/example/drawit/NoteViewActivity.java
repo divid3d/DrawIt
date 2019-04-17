@@ -133,9 +133,11 @@ public class NoteViewActivity extends AppCompatActivity {
         // when a scale gesture is detected, use it to resize the image
         @Override
         public boolean onScale(ScaleGestureDetector scaleGestureDetector){
-            mScaleFactor *= scaleGestureDetector.getScaleFactor();
-            noteImageView.setScaleX(mScaleFactor);
-            noteImageView.setScaleY(mScaleFactor);
+            if(mScaleFactor*scaleGestureDetector.getScaleFactor()>=1 && mScaleFactor*scaleGestureDetector.getScaleFactor()<4) {
+                mScaleFactor *= scaleGestureDetector.getScaleFactor();
+                noteImageView.setScaleX(mScaleFactor);
+                noteImageView.setScaleY(mScaleFactor);
+            }
             return true;
         }
     }

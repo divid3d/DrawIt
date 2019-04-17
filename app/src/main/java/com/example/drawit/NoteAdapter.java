@@ -130,7 +130,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.MyViewHolder> 
         } else {
             holder.favButton.setImageResource(R.drawable.ic_fav_uncheck_24dp);
         }
-        Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().into(holder.image, new Callback() {
+        Picasso.get().load(filteredNotes.get(position).getNoteUrl()).fit().centerInside().into(holder.image, new Callback() {
             @Override
             public void onSuccess() {
                 holder.image.setBlur(0);
